@@ -7,172 +7,85 @@ Original file is located at
     https://colab.research.google.com/drive/1JT4B1F8i4tbeU2n-HF_GTKaqKako7Bhm
 """
 
-import numpy as np
+# Import necessary libraries
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, BaggingRegressor
-from sklearn.metrics import mean_squared_error, r2_score
-import pickle
-import sys
 
 # Load the dataset
-a = pd.read_csv('CAR DETAILS.csv')  # Replace 'CAR DETAILS.csv' with your actual file path
+df = pd.read_csv('car_details.csv')
 
-# Check for missing values
-print(a.isnull().sum())
-
-# Remove duplicates
-a.drop_duplicates(inplace=True)
-
-# Display the cleaned dataset
-print(a.head(5))
+# Explore the dataset
+print(df.head())
+print(df.info())
 
 # Handle missing values
-a['name'].fillna(a['name'].mode()[0], inplace=True)
+print(df.isnull().sum())
+df = df.dropna()
 
-# One-Hot Encoding (for categorical features)
-a = pd.get_dummies(a, columns=['fuel'])
+# Encode categorical variables
+from sklearn.preprocessing import LabelEncoder
+le = LabelEncoder()
+df['fuel'] = le.fit_transform(df['fuel'])
+df['seller_type'] = le.fit_transform(df['seller_type'])
+df['transmission'] = le.fit_transform(df['transmission'])
+df['owner'] = le.fit_transform(df['owner'])
 
-# Imputation (for numerical features)
-a['year'].fillna(a['year'].mean(), inplace=True)
+# Exploratory Data Analysis
+# Visualize the distribution of numerical features
+plt.figure(figsize=(12, 6))
+sns.displot(df['year'], kde=True)
+plt.title('Distribution of Car Year')
+plt.show()
 
-# Scaling of Data
-scaler = StandardScaler()
-a[['selling_price']] = scaler.fit_transform(a[['selling_price']])
+plt.figure(figsize=(12, 6))
+sns.displot(df['selling_price'], kde=True)
+plt.title('Distribution of Selling Price')
+plt.show()
 
-# Display the pre-processed dataset
-print(a.head(5))
+plt.figure(figsize=(12, 6))
+sns.displot(df['km_driven'], kde=True)
+plt.title('Distribution of Kilometers Driven')
+plt.show()
 
-# Summary statistics
-print(a.describe())
-
-# Correlation matrix
-corr_matrix = a.corr(numeric_only=True)
-plt.figure(figsize=(12, 10))
-sns.heatmap(corr_matrix, annot=True, cmap='coolwarm')
+# Analyze the relationships between features
+plt.figure(figsize=(12, 6))
+# Calculate the correlation matrix only for numerical features
+sns.heatmap(df.select_dtypes(include=np.number).corr(), annot=True, cmap='YlOrRd')
 plt.title('Correlation Matrix')
 plt.show()
 
-# Histograms for numerical features
-a.hist(figsize=(12, 10), bins=20)
-plt.show()
+# Prepare the data for machine learning
+# Prepare the data for machine learning
+X = df.drop(['name','selling_price'], axis=1) # Remove 'selling_price' from features
+y = df['selling_price'] # Predict 'selling_price'
 
-# Box plots for numerical features
-a.boxplot(figsize=(12, 10))
-plt.show()
-
-# Scatter plots for relationships between features
-plt.figure(figsize=(8, 6))
-sns.scatterplot(x='year', y='selling_price', data=a)
-plt.title('Year vs Selling Price')
-plt.show()
-
-# Pairplot for visualizing relationships between multiple features
-sns.pairplot(a[['selling_price', 'km_driven', 'year']])
-plt.show()
-
-# Separate features (X) and target variable (y)
-X = a.drop(['selling_price', 'name', 'seller_type', 'owner'], axis=1)
-y = a['selling_price']
-
-X = pd.get_dummies(X, columns=['transmission'])
-
-# Split the data into training and testing sets
+from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Linear Regression
-lr_model = LinearRegression()
-lr_model.fit(X_train, y_train)
-lr_predictions = lr_model.predict(X_test)
-lr_mse = mean_squared_error(y_test, lr_predictions)
-lr_r2 = r2_score(y_test, lr_predictions)
-print(f"Linear Regression - MSE: {lr_mse}, R-squared: {lr_r2}")
+# Train and evaluate machine learning models
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, r2_score
 
-# Random Forest Regression
-rf_model = RandomForestRegressor(random_state=42)
-rf_model.fit(X_train, y_train)
-rf_predictions = rf_model.predict(X_test)
-rf_mse = mean_squared_error(y_test, rf_predictions)
-rf_r2 = r2_score(y_test, rf_predictions)
-print(f"Random Forest Regression - MSE: {rf_mse}, R-squared: {rf_r2}")
+lr = LinearRegression()
+lr.fit(X_train, y_train)
+lr_pred = lr.predict(X_test)
+lr_mse = mean_squared_error(y_test, lr_pred)
+lr_r2 = r2_score(y_test, lr_pred)
 
-# Gradient Boosting Regression
-gb_model = GradientBoostingRegressor(random_state=42)
-gb_model.fit(X_train, y_train)
-gb_predictions = gb_model.predict(X_test)
-gb_mse = mean_squared_error(y_test, gb_predictions)
-gb_r2 = r2_score(y_test, gb_predictions)
-print(f"Gradient Boosting Regression - MSE: {gb_mse}, R-squared: {gb_r2}")
+rf = RandomForestRegressor()
+rf.fit(X_train, y_train)
+rf_pred = rf.predict(X_test)
+rf_mse = mean_squared_error(y_test, rf_pred)
+rf_r2 = r2_score(y_test, rf_pred)
 
-# Bagging Regression
-bagging_model = BaggingRegressor(random_state=42)
-bagging_model.fit(X_train, y_train)
-bagging_predictions = bagging_model.predict(X_test)
-bagging_mse = mean_squared_error(y_test, bagging_predictions)
-bagging_r2 = r2_score(y_test, bagging_predictions)
-print(f"Bagging Regression - MSE: {bagging_mse}, R-squared: {bagging_r2}")
+# Determine the best model based on the evaluation metrics
 
-# Save the best model (e.g., Random Forest)
-best_model = rf_model
-filename = 'best_model.sav'
-pickle.dump(best_model, open(filename, 'wb'))
+# Save the best model
+import pickle
+pickle.dump(best_model, open('car_details_model.pkl', 'wb'))
 
 # Load the saved model
-loaded_model = pickle.load(open(filename, 'rb'))
-
-# Use the loaded model for predictions
-predictions = loaded_model.predict(X_test)
-
-# Picking 20 data points from the CAR DETAILS dataset and applying
-# the saved model on the same Dataset and test the model.
-# Sample 20 random data points
-sample_data = a.sample(n=20, random_state=42)
-
-# Separate features (X) and target variable (y) for the sample data
-X_sample = sample_data.drop(['selling_price', 'name', 'seller_type', 'owner'], axis=1)
-y_sample = sample_data['selling_price']
-
-# One-hot encode the categorical features in the sample data
-X_sample = pd.get_dummies(X_sample, columns=['transmission'])
-
-# Use the loaded model for predictions on the sample data
-sample_predictions = loaded_model.predict(X_sample)
-
-# Evaluate the model on the sample data
-sample_mse = mean_squared_error(y_sample, sample_predictions)
-sample_r2 = r2_score(y_sample, sample_predictions)
-print(f"Sample Data - MSE: {sample_mse}, R-squared: {sample_r2}")
-
-# Code to run in VS Code (without Streamlit)
-def predict_car_price(year, km_driven, fuel_Diesel, fuel_Petrol, transmission_Manual):
-    input_data = pd.DataFrame({
-        'year': [year],
-        'km_driven': [km_driven],
-        'fuel_Diesel': [fuel_Diesel],
-        'fuel_Petrol': [fuel_Petrol],
-        'fuel_CNG': [0],
-        'fuel_Electric': [0],
-        'fuel_LPG': [0],
-        'transmission_Manual': [transmission_Manual],
-        'transmission_Automatic': [1-transmission_Manual]
-    })
-
-    # Ensure the order of columns matches the training data
-    input_data = input_data[X_train.columns]
-
-    prediction = loaded_model.predict(input_data)[0]
-    return prediction
-
-# Example usage:
-year = 2018
-km_driven = 50000
-fuel_Diesel = 1
-fuel_Petrol = 0
-transmission_Manual = 1
-
-predicted_price = predict_car_price(year, km_driven, fuel_Diesel, fuel_Petrol, transmission_Manual)
-print(f"Predicted Price: {predicted_price}")
+loaded_model = pickle.load(open('car_details_model.pkl', 'rb'))
