@@ -7,6 +7,24 @@ Original file is located at
     https://colab.research.google.com/drive/1JT4B1F8i4tbeU2n-HF_GTKaqKako7Bhm
 """
 
+!pip install virtualenv
+
+!apt install python3.10-venv
+
+import os
+
+   # Set the name of your virtual environment
+   venv_name = 'myenv'
+
+   # Create the virtual environment
+   !python -m venv /content/$venv_name
+
+# Activate the virtual environment
+   !source /content/$venv_name/bin/activate
+
+# Install Streamlit in the virtual environment
+   !pip install streamlit
+
 import streamlit as st
 import pandas as pd
 import sklearn
