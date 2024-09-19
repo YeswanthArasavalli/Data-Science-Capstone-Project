@@ -7,7 +7,7 @@ Original file is located at
     https://colab.research.google.com/drive/1JT4B1F8i4tbeU2n-HF_GTKaqKako7Bhm
 """
 
-!pip install streamlit
+pip install streamlit
 
 import streamlit as st
 import pandas as pd
