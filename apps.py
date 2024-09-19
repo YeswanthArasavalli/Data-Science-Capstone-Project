@@ -154,7 +154,23 @@ st.title("Pairplot")
 sns.pairplot(df[['Selling_price', 'Km_driven', 'Year']])
 st.pyplot(plt)
 
-# Make prediction
-if st.sidebar.button("Predict Selling Price"):
+# Check expected feature names from training data
+expected_features = ['Year', 'Km_driven', 'Fuel', 'Seller_type', 'Owner','Transmission_0', 'Transmission_1']  # Replace with your actual feature names
+
+# Ensure user_input matches expected features and order
+if set(user_input.columns) == set(expected_features) and all(user_input.columns == expected_features):
+    # Print user_input columns for debugging
+    print("user_input columns:", user_input.columns)
+
     prediction = loaded_model.predict(user_input)
     st.write(f"Predicted Selling Price: {prediction[0]}")
+else:
+    # One-hot encode the user_input DataFrame
+    user_input = pd.get_dummies(user_input, columns=['Transmission'])
+    # Check to see if the user_input has the same columns as the training data
+    if set(user_input.columns) != set(expected_features):
+        st.error("Please provide data with the following features: " + ', '.join(expected_features))
+    else:
+        prediction = loaded_model.predict(user_input)
+        st.write(f"Predicted Selling Price: {prediction[0]}")
+    # ... (Optional: Handle the case of missing or mismatched features)
