@@ -154,15 +154,15 @@ def predict_car_price(year, km_driven, fuel_Diesel, fuel_Petrol, transmission_Ma
         'km_driven': [km_driven],
         'fuel_Diesel': [fuel_Diesel],
         'fuel_Petrol': [fuel_Petrol],
-        'fuel_CNG': [0], # add missing columns and set values to 0
+        'fuel_CNG': [0],
         'fuel_Electric': [0],
-'fuel_LPG': [0],
+        'fuel_LPG': [0],
         'transmission_Manual': [transmission_Manual],
-        'transmission_Automatic': [1-transmission_Manual] # Set Automatic to opposite of Manual
+        'transmission_Automatic': [1-transmission_Manual]
     })
 
     # Ensure the order of columns matches the training data
-    input_data = input_data[['year', 'km_driven', 'fuel_CNG', 'fuel_Diesel', 'fuel_Electric', 'fuel_LPG', 'fuel_Petrol', 'transmission_Automatic', 'transmission_Manual']]
+    input_data = input_data[X_train.columns]
 
     prediction = loaded_model.predict(input_data)[0]
     return prediction
