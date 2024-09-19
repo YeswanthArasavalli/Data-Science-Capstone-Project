@@ -147,3 +147,45 @@ sample_predictions = loaded_model.predict(X_sample)
 sample_mse = mean_squared_error(y_sample, sample_predictions)
 sample_r2 = r2_score(y_sample, sample_predictions)
 print(f"Sample Data - MSE: {sample_mse}, R-squared: {sample_r2}")
+
+!pip install streamlit
+#Import all required libraries
+import streamlit as st
+import pandas as pd
+import numpy as np
+import pickle
+from sklearn.preprocessing import StandardScaler
+
+# Load the saved model
+loaded_model = pickle.load(open('best_model.sav', 'rb'))
+
+# Function to preprocess input data
+def preprocess_input(year, km_driven, fuel_Diesel, fuel_Petrol, transmission_Manual):
+    input_data = pd.DataFrame({
+        'year': [year],
+        'km_driven': [km_driven],
+        'fuel_Diesel': [fuel_Diesel],
+        'fuel_Petrol': [fuel_Petrol],
+        'transmission_Manual': [transmission_Manual]
+    })
+    return input_data
+
+# Streamlit app
+st.title('Car Price Prediction')
+
+# Input fields
+year = st.number_input('Year', min_value=1990, max_value=2023, value=2015)
+km_driven = st.number_input('Kilometers Driven', min_value=0, value=50000)
+fuel_type = st.selectbox('Fuel Type', ['Diesel', 'Petrol'])
+transmission_type = st.selectbox('Transmission', ['Manual', 'Automatic'])
+
+# Convert fuel and transmission to one-hot encoding
+fuel_Diesel = 1 if fuel_type == 'Diesel' else 0
+fuel_Petrol = 1 if fuel_type == 'Petrol' else 0
+transmission_Manual = 1 if transmission_type == 'Manual' else 0
+
+# Make prediction when the user clicks the button
+if st.button('Predict Price'):
+    input_data = preprocess_input(year, km_driven, fuel_Diesel, fuel_Petrol, transmission_Manual)
+    prediction = loaded_model.predict(input_data)[0]
+    st.success(f'Predicted Selling Price: {prediction}')
