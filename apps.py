@@ -154,38 +154,7 @@ st.title("Pairplot")
 sns.pairplot(df[['Selling_price', 'Km_driven', 'Year']])
 st.pyplot(plt)
 
-import streamlit as st
-import pandas as pd
-from sklearn.preprocessing import LabelEncoder
-import pickle
-
-# Load the saved model
-loaded_model = pickle.load(open('best_model.sav', 'rb'))
-
-# Sidebar for user input
-st.sidebar.header("Car Details Input")
-
-# Input fields for user to enter car details
-Year = st.sidebar.slider("Year", int(df['Year'].min()), int(df['Year'].max()), int(df['Year'].mean()))
-Km_driven = st.sidebar.number_input("Kilometers Driven", min_value=0, value=int(df['Km_driven'].mean()))
-Fuel = st.sidebar.selectbox("Fuel Type", df['Fuel'].unique())
-Seller_type = st.sidebar.selectbox("Seller Type", df['Seller_type'].unique())
-Transmission = st.sidebar.selectbox("Transmission", df['Transmission'].unique())
-Owner = st.sidebar.selectbox("Owner", df['Owner'].unique())
-
-# Preprocess user input (assuming LabelEncoder is already fitted)
-user_input = pd.DataFrame({
-    'Year': [Year],
-    'Km_driven': [Km_driven],
-    'Fuel': [Fuel],
-    'Seller_type': [Seller_type],
-    'Transmission': [Transmission],
-    'Owner': [Owner]
-})
-
 # Make prediction
 if st.sidebar.button("Predict Selling Price"):
     prediction = loaded_model.predict(user_input)
     st.write(f"Predicted Selling Price: {prediction[0]}")
-
-# (Optional: Display additional information from the training script)
