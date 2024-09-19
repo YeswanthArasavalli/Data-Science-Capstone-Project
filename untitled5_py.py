@@ -148,7 +148,10 @@ sample_mse = mean_squared_error(y_sample, sample_predictions)
 sample_r2 = r2_score(y_sample, sample_predictions)
 print(f"Sample Data - MSE: {sample_mse}, R-squared: {sample_r2}")
 
+import sys
+!{sys.executable} -m pip install streamlit
 !pip install streamlit
+
 #Import all required libraries
 import streamlit as st
 import pandas as pd
