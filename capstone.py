@@ -7,9 +7,9 @@ Original file is located at
     https://colab.research.google.com/drive/1JT4B1F8i4tbeU2n-HF_GTKaqKako7Bhm
 """
 
+import streamlit as st
 import pandas as pd
 import pickle
-import matplotlib.pyplot as plt # Import Matplotlib for plotting
 
 # Load the dataset
 df = pd.read_csv('car_details.csv')
@@ -81,6 +81,61 @@ rf_mse = mean_squared_error(y_test, rf_pred)
 rf_r2 = r2_score(y_test, rf_pred)
 
 # Determine the best model based on the evaluation metrics
+
+# Save the best model
+import pickle
+pickle.dump(best_model, open('car_details_model.pkl', 'wb'))
+
+# Load the saved model
+loaded_model = pickle.load(open('car_details_model.pkl', 'rb'))
+
+import streamlit as st
+import pandas as pd
+import pickle
+
+# Load the dataset
+df = pd.read_csv('car_details.csv')
+
+# Explore the dataset
+st.write(df.head())
+st.write(df.info())
+
+# Handle missing values
+st.write(df.isnull().sum())
+df = df.dropna()
+
+# Encode categorical variables
+from sklearn.preprocessing import LabelEncoder
+le = LabelEncoder()
+df['fuel'] = le.fit_transform(df['fuel'])
+df['seller_type'] = le.fit_transform(df['seller_type'])
+df['transmission'] = le.fit_transform(df['transmission'])
+df['owner'] = le.fit_transform(df['owner'])
+
+# Exploratory Data Analysis
+# Visualize the distribution of numerical features
+st.write("Distribution of Car Year")
+st.histogram(df['year'], width=800)
+
+st.write("Distribution of Selling Price")
+st.histogram(df['selling_price'], width=800)
+
+st.write("Distribution of Kilometers Driven")
+st.histogram(df['km_driven'], width=800)
+
+# Analyze the relationships between features
+st.write("Correlation Matrix")
+st.write(df.corr())
+
+# Prepare the data for machine learning
+X = df.drop('name', axis=1)
+y = df['name']
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train and evaluate machine learning models
+# (Your existing code for training and evaluating models)
 
 # Save the best model
 import pickle
