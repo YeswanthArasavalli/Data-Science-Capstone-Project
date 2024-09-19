@@ -16,9 +16,6 @@ from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import LabelEncoder
-import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, BaggingRegressor
@@ -63,7 +60,6 @@ X['Fuel'] = le.fit_transform(X['Fuel']) # Encode 'fuel' column in the main dataf
 X['Seller_type'] = le.fit_transform(X['Seller_type'])
 X['Transmission'] = le.fit_transform(X['Transmission'])
 X['Owner'] = le.fit_transform(X['Owner'])
-X = pd.get_dummies(X, columns=['Transmission'])
 
 y = df['Selling_price']
 
@@ -112,8 +108,12 @@ loaded_model = pickle.load(open('best_model.sav', 'rb'))
 
 # Make prediction
 if st.sidebar.button("Predict Selling Price"):
-    prediction = loaded_model.predict(user_input)
-    st.write(f"Predicted Selling Price: {prediction[0]}")
+    try:
+        prediction = loaded_model.predict(user_input)
+        st.write(f"Predicted Selling Price: {prediction[0]}")
+    except Exception as e:
+        st.error(f"Error during prediction: {e}")
+
 
 # Display the dataset
 st.title("Car Details Dataset")
@@ -155,7 +155,7 @@ sns.pairplot(df[['Selling_price', 'Km_driven', 'Year']])
 st.pyplot(plt)
 
 # Check expected feature names from training data
-expected_features = ['Year', 'Km_driven', 'Fuel', 'Seller_type', 'Owner','Transmission_0', 'Transmission_1']  # Replace with your actual feature names
+expected_features = ['Year', 'Km_driven', 'Fuel', 'Seller_type', 'Owner', 'Transmission']  # Replace with your actual feature names
 
 # Ensure user_input matches expected features and order
 if set(user_input.columns) == set(expected_features) and all(user_input.columns == expected_features):
@@ -166,11 +166,14 @@ if set(user_input.columns) == set(expected_features) and all(user_input.columns 
     st.write(f"Predicted Selling Price: {prediction[0]}")
 else:
     # One-hot encode the user_input DataFrame
-    user_input = pd.get_dummies(user_input, columns=['Transmission'])
+    # user_input = pd.get_dummies(user_input, columns=['Transmission'])
     # Check to see if the user_input has the same columns as the training data
     if set(user_input.columns) != set(expected_features):
         st.error("Please provide data with the following features: " + ', '.join(expected_features))
     else:
-        prediction = loaded_model.predict(user_input)
-        st.write(f"Predicted Selling Price: {prediction[0]}")
+        try:
+            prediction = loaded_model.predict(user_input)
+            st.write(f"Predicted Selling Price: {prediction[0]}")
+        except Exception as e:
+            st.error(f"Error during prediction: {e}")
     # ... (Optional: Handle the case of missing or mismatched features)
